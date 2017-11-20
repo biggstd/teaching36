@@ -11,7 +11,7 @@ class gillespie:
         self.h_form = h_form
 
         # some stopper variables so the simulation does not go on forever.
-        self.max_time = max_time
+        # self.max_time = max_time
         self.max_count = max_count
 
         # start at one with the count.
@@ -21,12 +21,8 @@ class gillespie:
     # first thing to calculate is av = hv * cv
     # where v is an index
     def av_calc(self):
-<<<<<<< HEAD
         return [self.h_form[v](self.X_values) *
                 self.c_values[v - 1] for v in self.h_form]
-=======
-        return [self.h_form[v](self.X_values) * self.c_values[v - 1] for v in self.h_form]
->>>>>>> 4206971ffd1513df4b71bfe9afd13402e31b2d47
 
     # Then calculate a0, which is the sum of the av values
     def a0_calc(self, avals):
@@ -51,16 +47,20 @@ class gillespie:
         return u
 
     # now define a simulation function
-    def simulate(self, ):
+    def simulate(self):
 
         # an a list for output with the starting time, should be 0
         time_out = [0]
-        # an empty list that contains the X values, include the starting here, as it will change after
-        # the first pass of the algorithm.
+        # an empty list that contains the X values, include the starting
+        # here, as it will change after the first pass of the algorithm.
         X_out = [self.X_values]
 
         # while we haven't hit the heat death of the universe...
-        while self.time < self.max_time or self.max_time == None and self.count < self.max_count:
+        # if self.max_time is None:
+        while self.count < self.max_count:
+
+        # while (self.time < self.max_time) or \
+            # ((self.max_time == None) and self.count < self.max_count):
 
             # calculate av
             av = self.av_calc()

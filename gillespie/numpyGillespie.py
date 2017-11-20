@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import pandas as pd
@@ -33,15 +34,15 @@ class Gillespie:
         :param max_sim_rxn:
             The maximum number of reactions that the program will be
             allowed to simulate.
+
         """
 
         # Set the maximum number of allowed simulations.
-        # The +1 allows for the starting conditions to be recorded.
         self.max_sim_rxn = max_sim_rxn
 
         # Define numpy arrays of the species and rates inputs.
-        self.species = species
-        self.rates = rates
+        self.species = np.array(species)
+        self.rates = np.array(rates)
 
         # Create an array for the time output, the size is determined
         # by the maximum number of simulated events, as set by
@@ -54,36 +55,34 @@ class Gillespie:
             np.empty(shape=(self.max_sim_rxn, len(self.species)))
 
         # Append / set the initialization values to the arrays created.
-        # self.time_out[0] = 0
-        # self.species_out[0, :] = self.species
+        self.time_out[0] = 0
+        self.species_out[0] = self.species
+
+        # Set the reaction count index to one (to allow for the starting)
+        # values to be recoreded.
+        self.rxn_count = 1
 
         # Assign the inputs to the class instance.
         self.species_changes = species_changes
         self.permutations = permutations
-
-        # Initialize the reaction counter and time at 0.
-        self.rxn_count = 0
-        self.time = 0
 
     def calc_av(self, curr_species):
         """
         Calculate the Av value.
 
         The current permutations multiplied be the rates.
+
+        Will use `np.ma.fromiter(iterable, dtype, count=-1)`. Which
+        creates a new 1-dimensional array from an iterable object.
         """
 
-        # Create an empty list to append calculated Av values.
-        av_out = list()
-
-        # Create an index and pull the lambda functions out of the
-        # user supplied input to calculate Av values.
-        for idx, func in enumerate(self.permutations):
-            # Av values are calculated with the current species list.
-            # The index value is used to call the corresponding rate.
-            av_out.append(func(curr_species) * self.rates[idx])
+        # Create an generator that is iterable from the lambda
+        # functions found within `self.permutations`.
+        iterator = [fn(curr_species) * self.rates[i]
+                    for i, fn in enumerate(self.permutations)]
 
         # Return a numpy array of floats from the iterator above.`
-        return av_out
+        return np.fromiter(iterator, np.float)
 
     def calc_tau(self, Av_sum, random_value):
         """
@@ -195,6 +194,11 @@ class Gillespie:
             # Determine mu, the index of which reaction occurs.
             mu = self.calc_mu(Av, Av_0, r_two)
 
+            # Change the species by the function indexed by mu. The current
+            # index is given by the current reaction count.
+            self.species_out[self.rxn_count] = \
+                self.species_changes[mu](current_species)
+
             # Increment the reaction counter by one.
             self.rxn_count += 1
 
@@ -217,11 +221,12 @@ class CompleteGillespie(Gillespie):
     of arrays.
     """
 
-    def __init__(self, species, rates, species_changes, permutations,
-                 max_sim_rxn=10000):
-        """
-        Assigns the input values to appropriate numpy arrays.
+    def __init__(self, *args, **kwargs):
 
+        """
+        This `CompleteGillespie` initialization creates new output
+        arrays to return more data concerning the reactions simulated.
+        
         :param species:
             A list of the species to be tracked. Should be integers.
 
@@ -245,36 +250,10 @@ class CompleteGillespie(Gillespie):
             The maximum number of reactions that the program will be
             allowed to simulate.
         """
-
-        # Set the maximum number of allowed simulations.
-        # The +1 allows for the starting conditions to be recorded.
-        self.max_sim_rxn = max_sim_rxn
-
-        # Define numpy arrays of the species and rates inputs.
-        self.species = species
-        self.rates = rates
-
-        # Create an array for the time output, the size is determined
-        # by the maximum number of simulated events, as set by
-        # `self.max_sim_rxn`.
-        self.time_out = np.empty(shape=self.max_sim_rxn, dtype=np.float)
-
-        # Create an array for the species count output. The same length
-        # dimension is used as above, but species to track as well.
-        self.species_out = \
-            np.empty(shape=(self.max_sim_rxn, len(self.species)))
-
-        # Append / set the initialization values to the arrays created.
-        # self.time_out[0] = 0
-        # self.species_out[0, :] = self.species
-
-        # Assign the inputs to the class instance.
-        self.species_changes = species_changes
-        self.permutations = permutations
-
-        # Initialize the reaction counter and time at 0.
-        self.rxn_count = 0
-        self.time = 0
+        
+        # Call the parent classes __init__() function, pass any
+        # appropriate *args or **kwargs.
+        super().__init__(*args, **kwargs)
 
         # Create the advanced output arays.
         self.av_out = np.empty(shape=(self.max_sim_rxn, len(self.rates)))
