@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import pandas as pd
@@ -33,6 +34,7 @@ class Gillespie:
         :param max_sim_rxn:
             The maximum number of reactions that the program will be
             allowed to simulate.
+
         """
 
         # Set the maximum number of allowed simulations.
@@ -211,10 +213,12 @@ class CompleteGillespie(Gillespie):
     much more information.
     """
 
-    def __init__(self, species, rates, species_changes, permutations,
-                 max_sim_rxn=10000):
+    def __init__(self, *args, **kwargs):
 
         """
+        This `CompleteGillespie` initialization creates new output
+        arrays to return more data concerning the reactions simulated.
+        
         :param species:
             A list of the species to be tracked. Should be integers.
 
@@ -238,109 +242,14 @@ class CompleteGillespie(Gillespie):
             The maximum number of reactions that the program will be
             allowed to simulate.
         """
-
-        # Set the maximum number of allowed simulations.
-        self.max_sim_rxn = max_sim_rxn
-
-        # Define numpy arrays of the species and rates inputs.
-        self.species = np.array(species)
-        self.rates = np.array(rates)
-
-        # Create an array for the time output, the size is determined
-        # by the maximum number of simulated events, as set by
-        # `self.max_sim_rxn`.
-        self.time_out = np.empty(shape=self.max_sim_rxn, dtype=np.float)
-
-        # Create an array for the species count output. The same length
-        # dimension is used as above, but species to track as well.
-        self.species_out = \
-            np.empty(shape=(self.max_sim_rxn, len(self.species)))
+        
+        # Call the parent classes __init__() function, pass any
+        # appropriate *args or **kwargs.
+        super().__init__(*args, **kwargs)
 
         # Create the advanced output arays.
         self.av_out = np.empty(shape=(self.max_sim_rxn, len(self.rates)))
         self.mu_out = np.empty(self.max_sim_rxn)
-
-        # Append / set the initialization values to the arrays created.
-        self.time_out[0] = 0
-        self.species_out[0] = self.species
-
-        # Set the reaction count index to one (to allow for the starting)
-        # values to be recoreded.
-        self.rxn_count = 1
-
-        # Assign the inputs to the class instance.
-        self.species_changes = species_changes
-        self.permutations = permutations
-
-    def calc_tau(self, Av_sum, random_value):
-        """
-        Calculate the Tau value, which is the probable length of time
-        before any given simulated reaction occurs.
-
-        See the Gillespie paper for a discussion of this.
-        """
-        return (1. / Av_sum) * np.log(1.0 / random_value)
-
-    def calc_mu(self, Av_vals, Av_sum, random_value):
-        """
-        Calculate the mu value.
-
-        :param Av_vals:
-            The possible reaction permutations * their rates. Given
-            as a numpy array.
-
-        :param Av_sum:
-            The sum of the `Av_vals` array. This sum is used in
-            multiple places, so it is not calculated within this
-            function.
-
-        :param random_value:
-            A randomly generated value between zero and one.
-
-        :returns mu:
-            The index corresponding to the reaction that should be
-            simulated.
-
-        Essentially we generate blocks of value on a number line
-        from zero to one. A random number determines where on this
-        line a reaction "occurs".
-
-            [================================================]
-            0.0                  *                          1.0
-                                  A random point.
-
-        We cast the possible reactions to this scale by multiplying
-        the random value by the sum of Av values. Such casting is
-        done by chunks.
-
-            [================================================]
-            [=Chunk 1=][======Chunk 2======][=====Chunk 3====]
-
-        The sums of these chucnks are examined iteratively, and
-        when the sum is found to be greated than the randomly cast
-        point defined above, the corresponding reaction is simulated.
-
-        ..warning::
-            A different random value should be used for `calc_mu()` and
-            `calc_tau()`.
-        """
-
-        # Initialize the integer mu as 0.
-        mu = 0
-
-        # Cast the Av_sum to the random_value scale.
-        cast = Av_sum * random_value
-
-        # While the current sum is below the randomly cast value,
-        # increase the Av_vals sum range by one and check again.
-        # The + 1 below to the mu index moves the sum to the
-        # correct position, and maintains the integrity of the mu
-        # index.
-        while sum(Av_vals[:mu + 1]) < cast:
-            mu += 1
-
-        # When the sum is exceeded, return the mu index.
-        return mu
 
     def simulate(self):
         """

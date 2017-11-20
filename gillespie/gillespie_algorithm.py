@@ -21,12 +21,8 @@ class gillespie:
     # first thing to calculate is av = hv * cv
     # where v is an index
     def av_calc(self):
-<<<<<<< HEAD
         return [self.h_form[v](self.X_values) *
                 self.c_values[v - 1] for v in self.h_form]
-=======
-        return [self.h_form[v](self.X_values) * self.c_values[v - 1] for v in self.h_form]
->>>>>>> 4206971ffd1513df4b71bfe9afd13402e31b2d47
 
     # Then calculate a0, which is the sum of the av values
     def a0_calc(self, avals):
