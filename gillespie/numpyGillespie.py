@@ -8,7 +8,7 @@ import pandas as pd
 class Gillespie:
 
     def __init__(self, species, rates, species_changes, permutations,
-                 max_sim_rxn):
+                 max_sim_rxn, max_sim_time=None):
         """
         Assigns the input values to appropriate numpy arrays.
 
@@ -27,13 +27,13 @@ class Gillespie:
             available for each of the reactions tracked. Should be
             indexed the same as `species_change` and `rates`.
 
-        :param max_sim_time:
-            The maxiumum simulation time the program will be allowed
-            to run. This time depends on the scale chosen in the rates.
-
         :param max_sim_rxn:
             The maximum number of reactions that the program will be
             allowed to simulate.
+
+        :param max_sim_time:
+            The maxiumum simulation time the program will be allowed
+            to run. This time depends on the scale chosen in the rates.
 
         """
 
@@ -47,7 +47,7 @@ class Gillespie:
         # Create an array for the time output, the size is determined
         # by the maximum number of simulated events, as set by
         # `self.max_sim_rxn`.
-        self.time_out = np.empty(shape=self.max_sim_rxn, dtype=np.float)
+        self.time_out = np.empty(shape=self.max_sim_rxn, dtype=np.float64)
 
         # Create an array for the species count output. The same length
         # dimension is used as above, but species to track as well.
@@ -55,12 +55,13 @@ class Gillespie:
             np.empty(shape=(self.max_sim_rxn, len(self.species)))
 
         # Append / set the initialization values to the arrays created.
-        self.time_out[0] = 0
+        self.time_out[0] =  0.0
         self.species_out[0] = self.species
 
         # Set the reaction count index to one (to allow for the starting)
         # values to be recoreded.
-        self.rxn_count = 1
+        self.rxn_count = np.uint32(1)
+        self.time = np.float64(0.0)
 
         # Assign the inputs to the class instance.
         self.species_changes = species_changes
@@ -82,7 +83,7 @@ class Gillespie:
                     for i, fn in enumerate(self.permutations)]
 
         # Return a numpy array of floats from the iterator above.`
-        return np.fromiter(iterator, np.float)
+        return np.fromiter(iterator, np.float64)
 
     def calc_tau(self, Av_sum, random_value):
         """
@@ -169,14 +170,17 @@ class Gillespie:
         while self.rxn_count < self.max_sim_rxn:
 
             # Add the current species counts to the output list.
-            self.species_out[self.rxn_count] = self.species
+            # self.species_out[self.rxn_count] = self.species
+            self.species_out[self.rxn_count, :] = self.species
+
             # print("current_species", self.species)
 
             # Add the current time to the output list.
             self.time_out[self.rxn_count] = self.time
 
             # Calculate the Av values.
-            Av = self.calc_av(self.species)
+            Av = np.array(self.calc_av(self.species))
+
             # print("Av", Av)
 
             # Sum the Av values.
@@ -197,7 +201,7 @@ class Gillespie:
             # Change the species by the function indexed by mu. The current
             # index is given by the current reaction count.
             self.species_out[self.rxn_count] = \
-                self.species_changes[mu](current_species)
+                self.species_changes[mu](self.species)
 
             # Increment the reaction counter by one.
             self.rxn_count += 1

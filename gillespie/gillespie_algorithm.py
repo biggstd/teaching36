@@ -11,7 +11,7 @@ class gillespie:
         self.h_form = h_form
 
         # some stopper variables so the simulation does not go on forever.
-        # self.max_time = max_time
+        self.max_time = max_time
         self.max_count = max_count
 
         # start at one with the count.
@@ -57,8 +57,8 @@ class gillespie:
 
         # while we haven't hit the heat death of the universe...
         # if self.max_time is None:
-        while self.count < self.max_count:
-
+        while (self.count < self.max_count) and \
+            ((self.max_time is None) or (self.time < self.max_time)):
         # while (self.time < self.max_time) or \
             # ((self.max_time == None) and self.count < self.max_count):
 
