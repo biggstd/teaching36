@@ -1,1 +1,6 @@
 .ipynb_checkpoints/*
+\.spyproject/
+
+gillespie/\.ipynb_checkpoints/
+
+gillespie/__pycache__/
