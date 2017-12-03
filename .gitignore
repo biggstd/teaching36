@@ -4,3 +4,7 @@
 gillespie/\.ipynb_checkpoints/
 
 gillespie/__pycache__/
+
+IsingModel/\.ipynb_checkpoints/
+
+*.pyc
