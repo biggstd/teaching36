@@ -18,7 +18,7 @@ class Ising:
     This class models a 2-Dimensional Ising array.
     """
 
-    def __init__(self, array_size, initial_state='random'):
+    def __init__(self, array_size, initial_state='random', magnetic_state=-1):
         """
         Initialization of the Ising array.
         """
@@ -26,6 +26,7 @@ class Ising:
         # Create class instance variables.
         self.array_size = array_size
         self.ising_array = self.generate_initial_array(initial_state)
+        self.magnetic_state = magnetic_state
 
     def generate_initial_array(self, initial_state):
         """
@@ -57,17 +58,19 @@ class Ising:
         """
         return np.exp(-energy / (k * temperature))
 
-    def calc_spin_flip_energy(self, i, j):
+    def calc_spin_flip_energy(self, i, j, boundry_condition_function):
         """
         Calculate the energy, using a simplified Hamiltonian, of
         the current class instance array if the spin at index i, j
         is flipped.
         """
-        new_energy = -1 * self.ising_array[i, j] * (
-            self.ising_array[i + 1, j] +
-            self.ising_array[i - 1, j] +
-            self.ising_array[i, j - 1] +
-            self.ising_array[i, j + 1]
+
+        bcf = boundry_condition_function
+        new_energy = self.magnetic_state * self.ising_array[i, j] * (
+            self.ising_array[bcf(i - 1), j] +
+            self.ising_array[bcf(i + 1), j] +
+            self.ising_array[i, bcf(j - 1)] +
+            self.ising_array[i, bcf(j + 1)]
         )
 
         return new_energy
@@ -76,15 +79,23 @@ class Ising:
         """
         Apply periodic boundary conditions to a set of input
         index values.
+
+        A splice notation diagram is shown below.
+
+         +---+---+---+---+---+---+
+         | P | y | t | h | o | n |
+         +---+---+---+---+---+---+
+         0   1   2   3   4   5   6
+        -6  -5  -4  -3  -2  -1
         """
         # If the given index is on the right-most edge, return 0,
         # which is the beginning array index.
-        if n + 1 >= self.array_size:
+        if n > self.array_size - 1:
             return 0
 
         # If the given index is on the left-most edge, return the
         # size - 1, which is the right most edge index of the array.
-        if n < 0:
+        elif n < -1:
             return self.array_size - 1
 
         # Otherwise return the given index unchanged.
@@ -99,16 +110,13 @@ class Ising:
         # Generate two random indices.
         r1, r2 = np.random.randint(0, self.array_size, 2)
 
-        # Apply a given boundary condition.
-        r1 = self.apply_periodic_boundry(r1)
-        r2 = self.apply_periodic_boundry(r2)
-
         # Calculate the energy of the system if the spin at
         # r1, r2 is flipped.
-        spin_flip_energy = self.calc_spin_flip_energy(r1, r2)
+        spin_flip_energy = -1 * self.calc_spin_flip_energy(
+            r1, r2, self.apply_periodic_boundry)
 
         # If the flip results in a lower energy, simply flip the spin.
-        if spin_flip_energy < 0:
+        if spin_flip_energy <= 0:
             self.ising_array[r1, r2] *= -1
 
         # Otherwise, generate a new random value between 0 and 1.
@@ -118,7 +126,7 @@ class Ising:
               np.random.rand()):
             self.ising_array[r1, r2] *= -1
 
-    def simulate(self, epochs, temperature, epoch_size=500, video=True):
+    def simulate(self, epochs, temperature, epoch_size=1000, video=True):
         """
         Run a simulation for a given number of epochs and temperature.
         """
