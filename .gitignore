@@ -1,5 +1,4 @@
-.ipynb_checkpoints/*
-\.spyproject/
+.ipynb_checkpoints
 
 gillespie/\.ipynb_checkpoints/
 
