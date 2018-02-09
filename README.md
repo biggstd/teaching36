@@ -7,3 +7,9 @@ A collection of materials for teaching Data Science with Python.
 + install  `pylint` python package with `pip` or `conda`.
 + install `linter-pylint`
   + install dependencies
+
+## Setup a virtual environment
+
+```
+conda develop pynome
+```
