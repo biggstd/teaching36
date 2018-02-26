@@ -1,6 +1,12 @@
 # Docker Notes
 
 ```bash
+docker run pynometest:latest \
+  --mount source=pygenomes, target=/pynome \
+  pynome discover
+```
+
+```bash
 ## List Docker CLI commands
 docker
 docker container --help
