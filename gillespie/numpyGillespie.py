@@ -41,27 +41,21 @@ class Gillespie:
         self.max_sim_rxn = max_sim_rxn
 
         # Define numpy arrays of the species and rates inputs.
-        self.species = np.array(species)
-        self.rates = np.array(rates)
+        self.species = species
+        self.rates = rates
 
-        # Create an array for the time output, the size is determined
-        # by the maximum number of simulated events, as set by
-        # `self.max_sim_rxn`.
-        self.time_out = np.empty(shape=self.max_sim_rxn, dtype=np.float64)
+        # Set up the time and count attributes.
+        self.time = np.float(0.0)
 
-        # Create an array for the species count output. The same length
-        # dimension is used as above, but species to track as well.
-        self.species_out = \
-            np.empty(shape=(self.max_sim_rxn, len(self.species)))
+        # Create a list to store the output.
+        self.species_out = list()
+        self.time_out = list()
 
         # Append / set the initialization values to the arrays created.
-        self.time_out[0] =  0.0
-        self.species_out[0] = self.species
-
-        # Set the reaction count index to one (to allow for the starting)
-        # values to be recoreded.
-        self.rxn_count = np.uint32(1)
-        self.time = np.float64(0.0)
+        self.species_out.append(self.species)
+        self.time_out.append(self.time)
+        # The above counts as reaction 0.
+        self.rxn_count = 1
 
         # Assign the inputs to the class instance.
         self.species_changes = species_changes
@@ -83,7 +77,7 @@ class Gillespie:
                     for i, fn in enumerate(self.permutations)]
 
         # Return a numpy array of floats from the iterator above.`
-        return np.fromiter(iterator, np.float64)
+        return np.fromiter(iterator, np.float)
 
     def calc_tau(self, Av_sum, random_value):
         """
@@ -149,7 +143,7 @@ class Gillespie:
         # The + 1 below to the mu index moves the sum to the
         # correct position, and maintains the integrity of the mu
         # index.
-        while sum(Av_vals[:mu + 1]) < cast:
+        while np.sum(Av_vals[:mu + 1]) < cast:
             mu += 1
 
         # When the sum is exceeded, return the mu index.
@@ -169,23 +163,11 @@ class Gillespie:
         # Check if the maximum number of allowed reaction has been reached.
         while self.rxn_count < self.max_sim_rxn:
 
-            # Add the current species counts to the output list.
-            # self.species_out[self.rxn_count] = self.species
-            self.species_out[self.rxn_count, :] = self.species
-
-            # print("current_species", self.species)
-
-            # Add the current time to the output list.
-            self.time_out[self.rxn_count] = self.time
-
             # Calculate the Av values.
             Av = np.array(self.calc_av(self.species))
 
-            # print("Av", Av)
-
             # Sum the Av values.
-            Av_0 = sum(Av)
-            # print("Av_0", Av_0)
+            Av_0 = np.sum(Av)
 
             # Generate two random numbers.
             r_one, r_two = np.random.random(), np.random.random()
@@ -198,21 +180,20 @@ class Gillespie:
             # Determine mu, the index of which reaction occurs.
             mu = self.calc_mu(Av, Av_0, r_two)
 
-            # Change the species by the function indexed by mu. The current
-            # index is given by the current reaction count.
-            self.species_out[self.rxn_count] = \
-                self.species_changes[mu](self.species)
-
             # Increment the reaction counter by one.
             self.rxn_count += 1
 
             # Calculate the new population of species based on the mu index.
             self.species = self.species_changes[mu](self.species)
 
+            # Add the new species counts to the output list with the time.
+            self.time_out.append(self.time)
+            self.species_out.append(self.species)
+
         # When the loop is over (the maximum number of reactions to be
         # simulated has been reached) return a tuple of the time and
         # species values.
-        return (self.time_out, self.species_out)
+        return np.array(self.time_out), np.array(self.species_out)
 
 
 class CompleteGillespie(Gillespie):
@@ -230,7 +211,7 @@ class CompleteGillespie(Gillespie):
         """
         This `CompleteGillespie` initialization creates new output
         arrays to return more data concerning the reactions simulated.
-        
+
         :param species:
             A list of the species to be tracked. Should be integers.
 
@@ -254,7 +235,7 @@ class CompleteGillespie(Gillespie):
             The maximum number of reactions that the program will be
             allowed to simulate.
         """
-        
+
         # Call the parent classes __init__() function, pass any
         # appropriate *args or **kwargs.
         super().__init__(*args, **kwargs)
