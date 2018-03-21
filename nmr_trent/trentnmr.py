@@ -30,11 +30,15 @@ def process_fid(dic, data):
     This runs a fourier transform, autophases the datra, then removes
     the imaginary portion of the spectra.
     """
+    uc = ng.pipe.make_uc(dic, data)
+    
     data = ng.process.proc_base.fft(data)
     data = ng.process.proc_autophase.autops(data, 'peak_minima')
+
+
     dic, data = ng.pipe_proc.di(dic, data)
 
-    return dic, data
+    return dic, data, uc
 
 
 def find_nmr_peaks(data, intensity=500000):
@@ -45,7 +49,7 @@ def find_nmr_peaks(data, intensity=500000):
     return peaks
 
 
-def integrate_peak_by_linewidth(peaks, dic, data):
+def integrate_peak_by_linewidth(peaks, dic, data, uc):
     """Integrates a spectra based on the linewidth of its peaks.
     """
     integrals = dict()
