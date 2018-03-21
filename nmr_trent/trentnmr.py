@@ -49,7 +49,7 @@ def integrate_peak_by_linewidth(peaks, dic, data):
     """Integrates a spectra based on the linewidth of its peaks.
     """
     integrals = dict()
-
+    # TODO: Create a unit conversion object.
     for peak in peaks:
 
         peak_center = peak[0]
