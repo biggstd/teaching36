@@ -21,3 +21,22 @@
 8. Integrate peaks by using the line width.
 
 
+## Possible NMR values
+
++ Label
++ Filename
++ Experiment group
++ Experiment (internal) time
++ Date of experiment
++ Reference compound
++ Peak list
+    + Peak linewidth (FWHM)
+    + Peak integral
+    + Peak intensity
++ Temperature
++ Materials
+    + Concentration (Molarity)
+    + Source(s)
+    + % Purity (by weight)
+    + Composition / stoichiometry
++ Theoretical materials / species.

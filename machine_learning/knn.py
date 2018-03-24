@@ -65,7 +65,8 @@ def squared_distance(v, w):
 
 
 def distance(v, w):
-   return math.sqrt(squared_distance(v, w))
+#    print(math.sqrt(squared_distance(v, w)))
+    return math.sqrt(squared_distance(v, w))
 
 
 """
