@@ -1,0 +1,68 @@
+{
+  "ID": "sipos_2006_talanta_fig_3_KOH",
+  "Publications": {
+      "Title": "Chemical speciation in concentrated alkaline aluminate solutions in sodium, potassium and caesium media. Interpretation of the unusual variations of the observed hydroxide activity.",
+      "DOI": "10.1039/b513357b",
+      "Link": "doi_link, or something else."
+    },
+    "Experimentalist(s)":{
+      "Pal Sipos":{
+        "Affiliation": "Some university",
+        "Contact Email": "pal@fake.gmail.com"
+      }
+    },
+    "Experiment Date": "2006",
+    "Experiment Protocol(s)": {
+      "NMR Data Aquisition":{
+        "degrees celsius": 25,
+        "Magnet Strength MHz": 300,
+        "NMR Reference Compound": "KAl(SO4)2 5%, w/v",
+        "NMR Aquisition time in seconds": 0.5,
+        "NMR Pulse Width in seconds": 5e-06,
+        "Number of Scans": 120,
+        "NMR Pulse Angle degrees": 90
+      }
+    },
+      "Samples":{
+        "Caesium hydroxide aluminate solution":{
+          "Derives From":{
+            "Aluminum Wire":{
+              "percent purity by weight": 0.99,
+              "Stoichiometry":{
+                "Al": 1
+              },
+              "Species":{
+                "Al": "Al 3+"
+              }
+            },
+            "Caesium Hydroxide":{
+              "percent purity by weight": 0.98,
+              "Stoichiometry":{
+                "Cs": 1,
+                "O": 1,
+                "H": 1
+              },
+              "Species":{
+                "Cs": "Cs +",
+                "OH": "OH"
+              }
+            },
+            "Caesium Chloride":{
+              "percent purity by weight": 0.97,
+              "Stoichiometry":{
+                "Cs": 1,
+                "Cl": 1
+              },
+              "Species":{
+                "Cs": "Cs +",
+                "Cl": "Cl -"
+              }
+            }
+          }
+        }
+      },
+      "study_factors":{
+        "Aluminum Molarity": 0.005
+      },
+      "data_file": "data/sipos_2006_talanta_fig_3_KOH.csv"
+}
