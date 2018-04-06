@@ -33,7 +33,7 @@ def process_fid(dic, data):
     uc = ng.pipe.make_uc(dic, data)
     
     data = ng.process.proc_base.fft(data)
-    data = ng.process.proc_autophase.autops(data, 'peak_minima')
+    data = ng.process.proc_autophase.autops(data, 'acme')
 
 
     dic, data = ng.pipe_proc.di(dic, data)
