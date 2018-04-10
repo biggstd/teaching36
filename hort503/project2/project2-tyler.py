@@ -9,6 +9,7 @@ By: Tyler Biggs
 # Import standard packages.
 from sys import argv
 import collections
+import re
 
 # Import data science packages.
 from tqdm import tqdm
@@ -26,11 +27,14 @@ def pass_simple_tests(row):
     :returns:
         True or False
     """
+    # Scrape the carrot and the character immediately following it.
+    nucleotide_string = row[4]
+    nucleotide_string = re.sub()
 
     bad_symbols = ('+', '*', '-', '>', '<')
     minimum_reads = 10
 
-    if any(c in bad_symbols for c in row[4]):
+    if any(c in bad_symbols for c in nucleotide_string):
         return False
     elif row[3] < minimum_reads:
         return False

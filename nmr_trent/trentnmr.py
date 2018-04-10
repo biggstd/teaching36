@@ -3,6 +3,7 @@
 
 # General Python imports.
 import glob
+import os
 
 # NMR imports.
 import nmrglue as ng
@@ -24,6 +25,59 @@ def read_varian_as_nmrpipe(fid_file):
     return dic, data
 
 
+# def read_varian_dict(varian_dict):
+    # sw = varian_dict['sw'].get('values')
+    # size = varian_dict['']
+
+
+def write_varian_as_pipe(fid_file, output_folder):
+    """Reads a Varian .fid file and writes it as an NMR pipe file in the
+    output_folder directory.
+    """
+    # Get the basename of the fid_file.
+    # base_name = os.path.basename(fid_file)
+    base_name = os.sep.join(os.path.normpath(fid_file).split(os.sep)[5:])
+
+    dic, data = ng.varian.read(fid_file)
+    udic = ng.varian.guess_udic(dic, data)
+    convert = ng.convert.converter()
+    convert.from_varian(dic, data, udic)
+    output_path = os.path.join(output_folder, f"pipe-{base_name}")
+    ng.pipe.write(output_path, *convert.to_pipe(), overwrite=True)
+    return output_path
+
+
+def process_pipe_file(fid_file, output_folder):
+    """"""
+    # read in the file
+    dic, data = ng.pipe.read(fid_file)
+
+    # Get the base file name without an extension.
+    base = os.sep.join(os.path.normpath(fid_file).split(os.sep)[5:])
+    base = os.path.splitext(base)[0]
+
+    # Apodization.
+    # dic, data = ng.pipe_proc.sp(dic, data)
+
+    # Zero fill.
+    dic, data = ng.pipe_proc.zf(dic, data, auto=True)
+
+    # Complex Fourier transform.
+    dic, data = ng.pipe_proc.ft(dic, data, auto=True)
+
+    # Phase shift.
+    # dic, data = ng.pipe_proc.ps(dic, data, p0=-17.7, p1=-36.0)
+    data = ng.process.proc_autophase.autops(data, 'acme')
+
+    # Delete imaginaries.
+    dic, data = ng.pipe_proc.di(dic, data)
+
+    # write out processed data
+    output_path = os.path.join(output_folder, f"processed-{base}.ft")
+    ng.pipe.write(output_path, dic, data, overwrite=True)
+    return output_path
+
+
 def process_fid(dic, data):
     """Processes an NMR pipe file.
 
@@ -31,7 +85,7 @@ def process_fid(dic, data):
     the imaginary portion of the spectra.
     """
     uc = ng.pipe.make_uc(dic, data)
-    
+
     data = ng.process.proc_base.fft(data)
     data = ng.process.proc_autophase.autops(data, 'acme')
 
