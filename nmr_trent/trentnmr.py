@@ -4,9 +4,40 @@
 # General Python imports.
 import glob
 import os
+import nmrglue as ng
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import itertools
+import multiprocessing as mp
+import re
+from tqdm import tqdm
+
 
 # NMR imports.
 import nmrglue as ng
+
+
+def trim_file(path):
+    return os.sep.join(os.path.normpath(path).split(os.sep)[6:])
+
+
+def mp_proc_pipe(in_file, output_dir):
+    return process_pipe_file(in_file, output_dir)
+
+
+def pool_nmr_proc(file_list, output_dir, processes=mp.cpu_count() - 1):
+    pool = mp.Pool(processes=processes)
+    results = [pool.apply_async(mp_proc_pipe, args=(v, output_dir)) for v in file_list]
+    results = [p.get() for p in results]
+    return results
+
+
+def batch_nmrpipe_write(file_list, output_dir):
+    pipe_list = list()
+    for x in tqdm(file_list):
+        pipe_list.append(write_varian_as_pipe(x, output_dir))
+    return pipe_list
 
 
 def read_varian_as_nmrpipe(fid_file):
@@ -23,11 +54,6 @@ def read_varian_as_nmrpipe(fid_file):
     dic, data = C.to_pipe()
 
     return dic, data
-
-
-# def read_varian_dict(varian_dict):
-    # sw = varian_dict['sw'].get('values')
-    # size = varian_dict['']
 
 
 def write_varian_as_pipe(fid_file, output_folder):
