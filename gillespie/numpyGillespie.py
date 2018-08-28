@@ -9,8 +9,7 @@ class Gillespie:
 
     def __init__(self, species, rates, species_changes, permutations,
                  max_sim_rxn, max_sim_time=None):
-        """
-        Assigns the input values to appropriate numpy arrays.
+        """Assigns the input values to appropriate numpy arrays.
 
         :param species:
             A list of the species to be tracked. Should be integers.
@@ -32,7 +31,7 @@ class Gillespie:
             allowed to simulate.
 
         :param max_sim_time:
-            The maxiumum simulation time the program will be allowed
+            The maximum simulation time the program will be allowed
             to run. This time depends on the scale chosen in the rates.
 
         """
@@ -48,12 +47,13 @@ class Gillespie:
         self.time = np.float(0.0)
 
         # Create a list to store the output.
-        self.species_out = list()
-        self.time_out = list()
+        self.av_out = np.empty(shape=(self.max_sim_rxn, len(self.rates)))
+        self.species_out = np.empty(shape=(self.max_sim_rxn, len(self.species)))
+        self.time_out = np.empty(shape=self.max_sim_rxn)
 
         # Append / set the initialization values to the arrays created.
-        self.species_out.append(self.species)
-        self.time_out.append(self.time)
+        self.species_out[0, :] = self.species
+        self.time_out[0] = self.time
         # The above counts as reaction 0.
         self.rxn_count = 1
 
@@ -62,8 +62,7 @@ class Gillespie:
         self.permutations = permutations
 
     def calc_av(self, curr_species):
-        """
-        Calculate the Av value.
+        """Calculate the Av value.
 
         The current permutations multiplied be the rates.
 
@@ -76,12 +75,11 @@ class Gillespie:
         iterator = [fn(curr_species) * self.rates[i]
                     for i, fn in enumerate(self.permutations)]
 
-        # Return a numpy array of floats from the iterator above.`
+        # Return a numpy array of floats from the iterator above.
         return np.fromiter(iterator, np.float)
 
     def calc_tau(self, Av_sum, random_value):
-        """
-        Calculate the Tau value, which is the probable length of time
+        """Calculate the Tau value, which is the probable length of time
         before any given simulated reaction occurs.
 
         See the Gillespie paper for a discussion of this.
@@ -123,8 +121,8 @@ class Gillespie:
             [================================================]
             [=Chunk 1=][======Chunk 2======][=====Chunk 3====]
 
-        The sums of these chucnks are examined iteratively, and
-        when the sum is found to be greated than the randomly cast
+        The sums of these chunks are examined iteratively, and
+        when the sum is found to be greater than the randomly cast
         point defined above, the corresponding reaction is simulated.
 
         ..warning::
@@ -187,8 +185,8 @@ class Gillespie:
             self.species = self.species_changes[mu](self.species)
 
             # Add the new species counts to the output list with the time.
-            self.time_out.append(self.time)
-            self.species_out.append(self.species)
+            self.time_out[0] = self.time
+            self.species_out[0, :] = self.species
 
         # When the loop is over (the maximum number of reactions to be
         # simulated has been reached) return a tuple of the time and
@@ -228,7 +226,7 @@ class CompleteGillespie(Gillespie):
             indexed the same as `species_change` and `rates`.
 
         :param max_sim_time:
-            The maxiumum simulation time the program will be allowed
+            The maximum simulation time the program will be allowed
             to run. This time depends on the scale chosen in the rates.
 
         :param max_sim_rxn:
@@ -305,15 +303,14 @@ class CompleteGillespie(Gillespie):
 
 
 def pandas_output(out_dict):
-    """
-    Creates a pandas dataframe by iterating over selected dictionary
+    """Creates a pandas data frame by iterating over selected dictionary
     entries that have more than one dimensions in their output arrays.
 
     :param out_dict:
         A dictionary provided by `CompleteGillespie.simulate()`
 
     :returns:
-        A pandas dataframe, with enumerated columns generated from the
+        A pandas data frame, with enumerated columns generated from the
         multidimensional arrays `species` and `av`.
     """
 
@@ -347,5 +344,5 @@ def pandas_output(out_dict):
         # Use the key to assign the data to the output dictionary.
         df[new_av_key] = [s[i] for s in out_dict['av']]
 
-    # Return the pandas dataframe constructed above.
+    # Return the pandas data frame constructed above.
     return df
